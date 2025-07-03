@@ -1,23 +1,23 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 import os
 
 intents = discord.Intents.default()
-intents.message_content = True  # Important for message content access
-
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}!")
+    print(f"Logged in as {bot.user}")
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} slash command(s).")
+    except Exception as e:
+        print(f"Error syncing commands: {e}")
 
-@bot.command()
-async def ping(ctx):
-    await ctx.send("Pong!")
+@bot.tree.command(name="say", description="Make the bot speak!")
+@app_commands.describe(text="What should the bot say?")
+async def say(interaction: discord.Interaction, text: str):
+    await interaction.response.send_message(text)
 
-if __name__ == "__main__":
-    TOKEN = os.getenv("BOT_TOKEN")
-    if not TOKEN:
-        print("Error: No BOT_TOKEN found in environment variables.")
-    else:
-        bot.run(TOKEN)
+bot.run(os.getenv("BOT_TOKEN"))
