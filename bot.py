@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import os
+import asyncio
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -13,7 +14,11 @@ async def on_ready():
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} slash command(s).")
     except Exception as e:
-        print(f"Error syncing commands: {e}")
+        print(f"Failed to sync commands: {e}")
+
+    # Wait 10 seconds before shutting down to let Discord sync commands
+    await asyncio.sleep(10)
+    await bot.close()
 
 @bot.tree.command(name="say", description="Make the bot speak!")
 @app_commands.describe(text="What should the bot say?")
